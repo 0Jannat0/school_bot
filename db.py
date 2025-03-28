@@ -81,3 +81,19 @@ async def get_events():
         except Exception as e:
             print(f"Ошибка при получении событий: {e}")
             return None
+
+async def get_upcoming_events(days: int):
+    async with pool.acquire() as conn:
+        try:
+            return await conn.fetch(
+                """
+                SELECT event_name, event_date::date, description 
+                FROM events 
+                WHERE event_date BETWEEN CURRENT_DATE AND CURRENT_DATE + $1 * INTERVAL '1 day'
+                ORDER BY event_date
+                """,
+                days
+            )
+        except Exception as e:
+            print(f"Ошибка при получении событий: {e}")
+            return None
